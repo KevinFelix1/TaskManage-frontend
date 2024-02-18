@@ -5,8 +5,8 @@ function AuthLayout() {
     <>
       <header className="absolute"></header>
       <main className="flex justify-between h-screen">
-        <div className="w-1/2 h-full"></div>
-        <div className="w-1/2 flex justify-center items-center h-full">
+        <div className="w-1/2 h-full bg-auth_banner bg-cover bg-center bg-no-repeat"></div>
+        <div className="w-1/2 flex flex-col justify-center items-center h-full bg-neutral-200 text-zinc-950">
           <Outlet />
         </div>
       </main>
