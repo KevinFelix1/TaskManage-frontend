@@ -1,7 +1,15 @@
+import { MetaFunction } from "@remix-run/node";
 import { useLoaderData, useActionData, Form, Link } from "@remix-run/react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "TaskManager | login" },
+    { name: "description", content: "Welcome to login page!" },
+  ];
+};
 
 function Login() {
   return (
