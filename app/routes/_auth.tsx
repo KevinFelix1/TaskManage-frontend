@@ -1,4 +1,5 @@
 import { Link, Outlet } from "@remix-run/react";
+import ToggleTheme from "~/components/locals/toggle.theme";
 
 const Header = () => {
   return (
@@ -17,7 +18,9 @@ const Header = () => {
           TaskManager
         </Link>
       </section>
-      <div className="flex items-center justify-end"></div>
+      <div className="flex items-center justify-end pr-5">
+        <ToggleTheme />
+      </div>
     </header>
   );
 };
