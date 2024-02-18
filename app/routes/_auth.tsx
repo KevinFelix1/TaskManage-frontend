@@ -31,7 +31,7 @@ function AuthLayout() {
       <Header />
       <main className="flex justify-between h-screen">
         <div className="w-1/2 h-full bg-auth_banner bg-cover bg-center bg-no-repeat"></div>
-        <div className="w-1/2 flex flex-col justify-center items-center h-full bg-neutral-200 text-zinc-950">
+        <div className="w-1/2 flex flex-col justify-center items-center h-full bg-neutral-200 text-zinc-950 dark:bg-zinc-950 dark:text-neutral-100">
           <Outlet />
         </div>
       </main>
