@@ -3,10 +3,10 @@ import { Outlet } from "@remix-run/react";
 function AuthLayout() {
   return (
     <>
-      <header></header>
-      <main className="flex justify-between">
-        <div className="w-1/2"></div>
-        <div className="w-1/2">
+      <header className="absolute"></header>
+      <main className="flex justify-between h-screen">
+        <div className="w-1/2 h-full"></div>
+        <div className="w-1/2 flex justify-center items-center h-full">
           <Outlet />
         </div>
       </main>
