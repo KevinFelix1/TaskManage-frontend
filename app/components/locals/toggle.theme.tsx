@@ -9,32 +9,35 @@ import {
 } from "~/components/ui/dropdown-menu";
 
 const ToggleTheme = () => {
-  const [theme, setTheme] = useState<string>("light");
+  const [theme, setTheme] = useState<string>("system");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      console.log(theme);
       // El código dentro de este bloque solo se ejecutará en el navegador
       const savedTheme = localStorage.getItem("$#$theme");
       if (savedTheme) {
         setTheme(savedTheme);
         const html = document.documentElement;
         if (
-          html.classList.contains("light") &&
-          savedTheme !== html.classList[0].toString()
+          savedTheme === "dark" ||
+          ((savedTheme === "dark" || savedTheme === "system") &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches)
         ) {
-          html.classList.remove("light");
-        } else if (
-          html.classList.contains("dark") &&
-          savedTheme !== html.classList[0].toString()
-        ) {
+          html.classList.add("dark");
+        } else {
           html.classList.remove("dark");
-        } else if (
-          html.classList.contains("system") &&
-          savedTheme !== html.classList[0].toString()
-        ) {
-          html.classList.remove("system");
         }
-        html.classList.add(savedTheme);
+      } else {
+        const html = document.documentElement;
+        if (
+          (theme === "dark" || theme === "system") &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
+          html.classList.add("dark");
+        } else {
+          html.classList.remove("dark");
+        }
       }
     }
   }, [theme]);
