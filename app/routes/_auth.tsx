@@ -18,7 +18,7 @@ const Header = () => {
           TaskManager
         </Link>
       </section>
-      <div className="flex items-center justify-end pr-5">
+      <div className="flex items-center justify-end pr-5 dark:text-white">
         <ToggleTheme />
       </div>
     </header>
