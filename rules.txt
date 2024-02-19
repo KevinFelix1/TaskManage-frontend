@@ -2,3 +2,4 @@ height_buttons = h-12
 height_inputs = h-12
 size_labels = text-md
 space_in_form = space-y-4
+space_in_form_div = space-y-1

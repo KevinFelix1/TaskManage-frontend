@@ -1,14 +1,18 @@
 import { SessionStorage, redirect, json } from "@remix-run/node";
 import { sessionStorage } from "./session.server";
-import {
-  Errors,
-  User,
-  Response,
-  AuthRedirectOptions,
-} from "../helpers/auth.types";
+import { User, AuthRedirectOptions } from "../helpers/auth.types";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import db from "~/database/db.server";
+// Schemas
+import { registerSchema } from "~/schemas/auth.schema";
+
+type Response = null | User;
+
+interface ValidationErrors {
+  [key: string]: string;
+  [index: number]: string;
+}
 
 class AuthStrategy {
   private session: SessionStorage;
@@ -84,8 +88,6 @@ class AuthStrategy {
 
   async register(request: Request, options: AuthRedirectOptions) {
     let response;
-    let errors = {} as Errors;
-    //Not Redirection
     if (typeof options.successRedirect !== "string")
       throw new Response("no existe redireccion", { status: 404 });
     if (typeof options.failureRedirect !== "string")
@@ -99,8 +101,23 @@ class AuthStrategy {
     const password = String(form.get("password"));
     const repeatPassword = String(form.get("repeatPassword"));
 
-    // validations here
-    console.log(username, email, password);
+    const values = {
+      username,
+      email,
+      password,
+      repeatPassword,
+    };
+
+    try {
+      registerSchema.parse(values);
+    } catch (error) {
+      const { issues } = error as any;
+      let alerts = {} as ValidationErrors;
+      issues.forEach((field: any) => {
+        alerts[field.path[0]] = field.message;
+      });
+      return json(alerts);
+    }
 
     const passwordHash = await bcrypt.hash(password, 10);
     const token = jwt.sign({ email }, process.env.SECRET_KEY as string, {
@@ -115,7 +132,6 @@ class AuthStrategy {
         },
       });
     } catch (error) {
-      console.log(error);
       session.flash("error", "Ups! esta cuenta ya existe");
       throw redirect(options.failureRedirect, {
         headers: {

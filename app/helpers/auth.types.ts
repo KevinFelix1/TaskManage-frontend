@@ -11,12 +11,9 @@ export type User = {
   password?: string;
 };
 
-export type Errors = {
-  name?: string;
-  lastname?: string;
-  email?: string;
+export type ValidationErrors = {
+  username?: string;
+  emails?: string;
   password?: string;
-  repetPassword?: string;
+  repeatPassword?: string;
 };
-
-export type Response = null | User;
