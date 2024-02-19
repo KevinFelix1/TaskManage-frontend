@@ -20,3 +20,12 @@ export const registerSchema = z
   .refine((values) => values.password === values.repeatPassword, {
     message: "Tus passwords no coinciden",
   });
+
+export const authenticateSchema = z.object({
+  email: z
+    .string({ required_error: "El correo electrónico es requerido" })
+    .email({ message: "Email no valido" }),
+  password: z
+    .string({ required_error: "El password es requerido" })
+    .min(8, { message: "El password es demasiado corto" }),
+});

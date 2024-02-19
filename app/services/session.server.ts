@@ -8,7 +8,6 @@ type User = {
 
 type SessionData = {
   token: string;
-  session?: User;
 };
 
 type SessionFlashData = {

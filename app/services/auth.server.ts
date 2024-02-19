@@ -1,13 +1,13 @@
 import { SessionStorage, redirect, json } from "@remix-run/node";
 import bcrypt from "bcrypt";
 import { sessionStorage } from "./session.server";
-import { Profile, AuthRedirectOptions } from "~/lib/auth.types";
+import { Profile, AuthRedirectOptions, User } from "~/lib/auth.types";
 import db from "~/database/db.server";
 import { createUser } from "~/database/hooks/auth.server";
 import jwt from "jsonwebtoken";
 
 // Schemas
-import { registerSchema } from "~/schemas/auth.schema";
+import { registerSchema, authenticateSchema } from "~/schemas/auth.schema";
 
 type Response = null | Profile;
 
@@ -23,70 +23,83 @@ class AuthStrategy {
     this.session = session;
   }
 
-  // async authenticate(request: Request, options: AuthRedirectOptions) {
-  //   let errors: Errors = {};
-  //   if (typeof options.failureRedirect !== "string")
-  //     throw new Response("No existe redireccion", { status: 404 });
-  //   if (typeof options.successRedirect !== "string")
-  //     throw new Response("No existe redireccion", { status: 404 });
-  //   const session = await this.session.getSession(
-  //     request.headers.get("Cookie")
-  //   );
-  //   const form = await request.formData();
-  //   const email = form.get("email") as string;
-  //   const password = form.get("password") as string;
-  //   //validations on client
-  //   if (!this.verifyEmail(email)) errors.email = "Email invalido";
-  //   if (password.length < 8) errors.password = "Contraseña no valida";
-  //   if (Object.keys(errors).length > 0) return json({ errors });
-  //   //search in the database of user
-  //   const user = await db.user.findUnique({
-  //     where: {
-  //       email,
-  //     },
-  //   });
-  //   if (user === null) {
-  //     session.flash("error", "Usuario no encontrado");
-  //     // Redirect back to the login page with errors.
-  //     throw redirect(options.failureRedirect, {
-  //       headers: {
-  //         "Set-Cookie": await this.session.commitSession(session),
-  //       },
-  //     });
-  //   }
-  //   const match = await bcrypt.compare(password, user.password);
-  //   if (!match) {
-  //     session.flash("error", "Email u contraseña no es valida");
-  //     // Redirect back to the login page with errors.
-  //     throw redirect(options.failureRedirect, {
-  //       headers: {
-  //         "Set-Cookie": await this.session.commitSession(session),
-  //       },
-  //     });
-  //   }
-  //   if (user.verified === false) {
-  //     session.flash("error", "Usuario no verificado");
-  //     // Redirect back to the login page with errors.
-  //     throw redirect(options.failureRedirect, {
-  //       headers: {
-  //         "Set-Cookie": await this.session.commitSession(session),
-  //       },
-  //     });
-  //   }
-  //   //set token in the session
-  //   const { name, lastname, id } = user;
-  //   const token = `Bearer ${jwt.sign(
-  //     { id, email, name, lastname },
-  //     process.env.SECRET_KEY as string,
-  //     { expiresIn: "1h" }
-  //   )}`;
-  //   session.set("authToken", token);
-  //   return redirect(options.successRedirect, {
-  //     headers: {
-  //       "Set-Cookie": await this.session.commitSession(session),
-  //     },
-  //   });
-  // }
+  async authenticate(request: Request, options: AuthRedirectOptions) {
+    if (
+      typeof options.failureRedirect !== "string" ||
+      typeof options.successRedirect !== "string"
+    )
+      throw new Response("Not exist redirection", { status: 404 });
+    const session = await this.session.getSession(
+      request.headers.get("Cookie")
+    );
+    const form = await request.formData();
+    const values = {
+      email: form.get("email") as string,
+      password: form.get("password" as string),
+    } as User;
+
+    try {
+      authenticateSchema.parse(values);
+      const user = await db.user.findUnique({
+        where: {
+          email: values.email,
+        },
+      });
+
+      if (user === null) {
+        session.flash("error", "Usuario no encontrado");
+        // Redirect back to the login page with errors.
+        throw redirect(options.failureRedirect, {
+          headers: {
+            "Set-Cookie": await this.session.commitSession(session),
+          },
+        });
+      }
+      const match = await bcrypt.compare(values.password, user.password);
+      if (!match) {
+        session.flash("error", "Email u contraseña no es valida");
+        // Redirect back to the login page with errors.
+        throw redirect(options.failureRedirect, {
+          headers: {
+            "Set-Cookie": await this.session.commitSession(session),
+          },
+        });
+      }
+      if (user.verified === false) {
+        session.flash("error", "Usuario no verificado");
+        // Redirect back to the login page with errors.
+        throw redirect(options.failureRedirect, {
+          headers: {
+            "Set-Cookie": await this.session.commitSession(session),
+          },
+        });
+      }
+      const { username, id, email } = user;
+      const token = jwt.sign(
+        { id, username, email },
+        process.env.SECRET_KEY as string,
+        { expiresIn: "1h" }
+      );
+      session.set("Session", token);
+    } catch (error: any) {
+      if (error.issues) {
+        const { issues } = error as any;
+        let alerts = {} as ValidationErrors;
+        issues.forEach((field: any) => {
+          alerts[field.path[0]] = field.message;
+        });
+        return json(alerts);
+      } else {
+        console.log(error);
+      }
+    }
+
+    return redirect(options.successRedirect, {
+      headers: {
+        "Set-Cookie": await this.session.commitSession(session),
+      },
+    });
+  }
 
   async register(request: Request, options: AuthRedirectOptions) {
     let response;
@@ -100,19 +113,19 @@ class AuthStrategy {
     );
     const form = await request.formData();
     const values = {
-      username: String(form.get("username")),
-      email: String(form.get("email")),
-      password: String(form.get("password")),
-      repeatPassword: String(form.get("repeatPassword")),
+      username: form.get("username") as string,
+      email: form.get("email") as string,
+      password: form.get("password") as string,
+      repeatPassword: form.get("repeatPassword") as string,
     };
 
     try {
       registerSchema.parse(values);
       const passwordHash = await bcrypt.hash(values.password, 10);
-      const { email } = values;
-      const token = jwt.sign({ email }, process.env.SECRET_KEY as string, {
-        expiresIn: "7d",
-      });
+      const { username } = values;
+      // const token = jwt.sign({ username }, process.env.SECRET_KEY as string, {
+      //   expiresIn: "7d",
+      // });
       values.password = passwordHash;
       response = await createUser(values);
       session.flash(
