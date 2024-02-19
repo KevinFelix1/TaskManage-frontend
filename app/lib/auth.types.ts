@@ -3,12 +3,18 @@ export interface AuthRedirectOptions {
   successRedirect?: string;
 }
 
-export type User = {
+export type Profile = {
   id?: number;
   name?: string;
   lastname?: string;
   email?: string;
   password?: string;
+};
+
+export type User = {
+  username: string;
+  email: string;
+  password: string;
 };
 
 export type ValidationErrors = {

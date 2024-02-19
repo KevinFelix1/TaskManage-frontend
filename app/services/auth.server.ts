@@ -1,14 +1,15 @@
 import { SessionStorage, redirect, json } from "@remix-run/node";
 import bcrypt from "bcrypt";
 import { sessionStorage } from "./session.server";
-import { User, AuthRedirectOptions } from "~/lib/auth.types";
+import { Profile, AuthRedirectOptions } from "~/lib/auth.types";
 import db from "~/database/db.server";
+import { createUser } from "~/database/hooks/auth.server";
 import jwt from "jsonwebtoken";
 
 // Schemas
 import { registerSchema } from "~/schemas/auth.schema";
 
-type Response = null | User;
+type Response = null | Profile;
 
 interface ValidationErrors {
   [key: string]: string;
@@ -112,13 +113,8 @@ class AuthStrategy {
       const token = jwt.sign({ email }, process.env.SECRET_KEY as string, {
         expiresIn: "7d",
       });
-      response = await db.user.create({
-        data: {
-          username: values.username,
-          email: values.email,
-          password: passwordHash,
-        },
-      });
+      values.password = passwordHash;
+      response = await createUser(values);
       session.flash(
         "success",
         "Tu cuenta fue creada con éxito, revisa tu correo para confirmar tu cuenta."
