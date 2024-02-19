@@ -13,7 +13,6 @@ const ToggleTheme = () => {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      console.log(theme);
       // El código dentro de este bloque solo se ejecutará en el navegador
       const savedTheme = localStorage.getItem("$#$theme");
       if (savedTheme) {
