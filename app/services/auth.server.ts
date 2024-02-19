@@ -97,12 +97,14 @@ class AuthStrategy {
     const username = String(form.get("username"));
     const email = String(form.get("email"));
     const password = String(form.get("password"));
+    const repeatPassword = String(form.get("repeatPassword"));
 
     // validations here
+    console.log(username, email, password);
 
     const passwordHash = await bcrypt.hash(password, 10);
     const token = jwt.sign({ email }, process.env.SECRET_KEY as string, {
-      expiresIn: "1h",
+      expiresIn: "7d",
     });
     try {
       response = await db.user.create({
