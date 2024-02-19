@@ -4,7 +4,9 @@ export const registerSchema = z
   .object({
     username: z
       .string({ required_error: "El nombre de usuario es obligatorio" })
-      .min(3, { message: "Nombre de usuario demasiado corto" }),
+      .min(3, {
+        message: "El nombre de usuario debe ser mayor a 3 caracteres",
+      }),
     email: z
       .string({ required_error: "El correo electrónico es requerido" })
       .email({ message: "Email no valido" }),

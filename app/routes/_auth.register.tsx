@@ -5,6 +5,8 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { registerFields } from "~/utils/auth.utils";
+import { ValidationErrors } from "~/helpers/auth.types";
+
 export const meta: MetaFunction = () => {
   return [
     { title: "TaskManager | Register" },
@@ -20,8 +22,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 function RegisterPage() {
-  const actionData = useActionData();
-  console.log(actionData);
+  const actionData = useActionData() as ValidationErrors;
   return (
     <>
       <h1 className="text-3xl font-semibold cursor-default">Crear cuenta</h1>
@@ -31,6 +32,7 @@ function RegisterPage() {
       </p>
       <Form className="w-96 mt-4 space-y-4" method="POST">
         <div className="space-y-1">
+          {actionData?.username && <p>{actionData.username}</p>}
           <Label
             htmlFor="username"
             className="block text-md relative after:absolute after:content-['*'] after:text-2xl after:-bottom-1 after:ml-1 after:text-red-700">
