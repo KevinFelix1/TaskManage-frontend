@@ -1,6 +1,6 @@
 import { SessionStorage, redirect, json } from "@remix-run/node";
 import { sessionStorage } from "./session.server";
-import { User, AuthRedirectOptions } from "../helpers/auth.types";
+import { User, AuthRedirectOptions } from "../lib/auth.types";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import db from "~/database/db.server";

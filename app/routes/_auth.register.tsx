@@ -4,8 +4,7 @@ import Authenticator from "~/services/auth.server";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { registerFields } from "~/utils/auth.utils";
-import { ValidationErrors } from "~/helpers/auth.types";
+import { ValidationErrors } from "~/lib/auth.types";
 
 export const meta: MetaFunction = () => {
   return [
