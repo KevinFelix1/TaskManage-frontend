@@ -3,7 +3,7 @@ import { useLoaderData, useActionData, Form, Link } from "@remix-run/react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-
+import { registerFields } from "~/utils/auth.utils";
 export const meta: MetaFunction = () => {
   return [
     { title: "TaskManager | Register" },
@@ -28,42 +28,22 @@ function RegisterPage() {
         No te preocupes estas en el lugar correcto.
       </p>
       <Form className="w-96 mt-4 space-y-4" method="POST">
-        <Label
-          htmlFor="username"
-          className="block text-md relative after:absolute after:content-['*'] after:text-2xl after:-bottom-1 after:ml-1 after:text-red-700">
-          Username
-        </Label>
-        <Input
-          type="text"
-          id="username"
-          name="username"
-          placeholder="Como quieres que te llamemos?."
-          className="h-12 border-zinc-700"
-        />
-        <Label
-          htmlFor="email"
-          className="block text-md relative after:absolute after:content-['*'] after:text-2xl after:-bottom-1 after:ml-1 after:text-red-700">
-          Email
-        </Label>
-        <Input
-          type="email"
-          id="email"
-          name="email"
-          placeholder="Ingresa tu correo electrónico."
-          className="h-12 border-zinc-700"
-        />
-        <Label
-          htmlFor="password"
-          className="block text-md relative after:absolute after:content-['*'] after:text-2xl after:-bottom-1 after:ml-1 after:text-red-700">
-          Password
-        </Label>
-        <Input
-          type="password"
-          id="password"
-          name="password"
-          placeholder="Ingresa tu contraseña."
-          className="h-12 border-zinc-700"
-        />
+        {registerFields.map((field) => (
+          <>
+            <Label
+              htmlFor={field.name}
+              className="block text-md relative after:absolute after:content-['*'] after:text-2xl after:-bottom-1 after:ml-1 after:text-red-700">
+              {field.label}
+            </Label>
+            <Input
+              type={field.type}
+              id={field.name}
+              name={field.name}
+              placeholder={field.message}
+              className="h-12 border-zinc-700"
+            />
+          </>
+        ))}
         <div className="flex justify-end">
           <Button className="w-28 h-12">Crear cuenta</Button>
         </div>
