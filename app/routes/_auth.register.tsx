@@ -11,6 +11,14 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+export const action = async () => {
+  const response = await fetch(process.env.URL as string, {
+    method: "GET",
+  });
+  console.log(response);
+  return null;
+};
+
 function RegisterPage() {
   return (
     <>
@@ -19,7 +27,7 @@ function RegisterPage() {
         Genial! nos da gusto que pienses en nosotros como nosotros en ti. <br />
         No te preocupes estas en el lugar correcto.
       </p>
-      <Form className="w-96 mt-4 space-y-4">
+      <Form className="w-96 mt-4 space-y-4" method="POST">
         <Label
           htmlFor="username"
           className="block text-md relative after:absolute after:content-['*'] after:text-2xl after:-bottom-1 after:ml-1 after:text-red-700">
