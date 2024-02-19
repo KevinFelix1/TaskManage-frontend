@@ -8,7 +8,7 @@ import {
 } from "../helpers/auth.types";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import db from "~/utils/db.server";
+import db from "~/database/db.server";
 
 class AuthStrategy {
   private session: SessionStorage;
