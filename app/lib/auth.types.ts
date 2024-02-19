@@ -13,7 +13,8 @@ export type User = {
 
 export type ValidationErrors = {
   username?: string;
-  emails?: string;
+  email?: string;
   password?: string;
   repeatPassword?: string;
+  undefined?: string;
 };

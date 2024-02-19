@@ -1,9 +1,10 @@
 import { SessionStorage, redirect, json } from "@remix-run/node";
-import { sessionStorage } from "./session.server";
-import { User, AuthRedirectOptions } from "../lib/auth.types";
-import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { sessionStorage } from "./session.server";
+import { User, AuthRedirectOptions } from "~/lib/auth.types";
 import db from "~/database/db.server";
+import jwt from "jsonwebtoken";
+
 // Schemas
 import { registerSchema } from "~/schemas/auth.schema";
 
@@ -88,61 +89,69 @@ class AuthStrategy {
 
   async register(request: Request, options: AuthRedirectOptions) {
     let response;
-    if (typeof options.successRedirect !== "string")
-      throw new Response("no existe redireccion", { status: 404 });
-    if (typeof options.failureRedirect !== "string")
-      throw new Response("No existe redireccion", { status: 404 });
+    if (
+      typeof options.successRedirect !== "string" ||
+      typeof options.failureRedirect !== "string"
+    )
+      throw new Response("not exist redirection", { status: 500 });
     const session = await this.session.getSession(
       request.headers.get("Cookie")
     );
     const form = await request.formData();
-    const username = String(form.get("username"));
-    const email = String(form.get("email"));
-    const password = String(form.get("password"));
-    const repeatPassword = String(form.get("repeatPassword"));
-
     const values = {
-      username,
-      email,
-      password,
-      repeatPassword,
+      username: String(form.get("username")),
+      email: String(form.get("email")),
+      password: String(form.get("password")),
+      repeatPassword: String(form.get("repeatPassword")),
     };
 
     try {
       registerSchema.parse(values);
-    } catch (error) {
-      const { issues } = error as any;
-      let alerts = {} as ValidationErrors;
-      issues.forEach((field: any) => {
-        alerts[field.path[0]] = field.message;
+      const passwordHash = await bcrypt.hash(values.password, 10);
+      const { email } = values;
+      const token = jwt.sign({ email }, process.env.SECRET_KEY as string, {
+        expiresIn: "7d",
       });
-      return json(alerts);
-    }
-
-    const passwordHash = await bcrypt.hash(password, 10);
-    const token = jwt.sign({ email }, process.env.SECRET_KEY as string, {
-      expiresIn: "7d",
-    });
-    try {
       response = await db.user.create({
         data: {
-          username,
-          email,
+          username: values.username,
+          email: values.email,
           password: passwordHash,
         },
       });
-    } catch (error) {
-      session.flash("error", "Ups! esta cuenta ya existe");
-      throw redirect(options.failureRedirect, {
-        headers: {
-          "Set-Cookie": await this.session.commitSession(session),
-        },
-      });
+      session.flash(
+        "success",
+        "Tu cuenta fue creada con éxito, revisa tu correo para confirmar tu cuenta."
+      );
+    } catch (error: any) {
+      if (error.issues) {
+        const { issues } = error as any;
+        let alerts = {} as ValidationErrors;
+        issues.forEach((field: any) => {
+          alerts[field.path[0]] = field.message;
+        });
+        return json(alerts);
+      } else if (error.meta?.target) {
+        console.log(error.meta.target);
+        if (error.meta.target === "User_email_key") {
+          session.flash("error", "Ups! esta cuenta ya existe.");
+          throw redirect(options.failureRedirect, {
+            headers: {
+              "Set-Cookie": await this.session.commitSession(session),
+            },
+          });
+        } else {
+          session.flash("error", "Ups! El nombre de usuario ya esta en uso.");
+          throw redirect(options.failureRedirect, {
+            headers: {
+              "Set-Cookie": await this.session.commitSession(session),
+            },
+          });
+        }
+      } else {
+        console.log(error);
+      }
     }
-    session.flash(
-      "success",
-      "Tu cuenta fue creada con éxito 🥳, revisa tu correo para confirmar tu cuenta."
-    );
     return redirect(options.successRedirect, {
       headers: {
         "Set-Cookie": await this.session.commitSession(session),

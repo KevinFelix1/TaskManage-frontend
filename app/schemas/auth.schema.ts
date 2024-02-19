@@ -15,7 +15,7 @@ export const registerSchema = z
       .min(8, { message: "El password es demasiado corto" }),
     repeatPassword: z
       .string({ required_error: "El password es requerido" })
-      .min(8, { message: "El password es demasiado corto" }),
+      .min(8, { message: "Repite tu contraseña" }),
   })
   .refine((values) => values.password === values.repeatPassword, {
     message: "Tus passwords no coinciden",
