@@ -4,13 +4,20 @@ import {
   LoaderFunctionArgs,
   json,
 } from "@remix-run/node";
-import { useLoaderData, useActionData, Form, Link } from "@remix-run/react";
+import {
+  useLoaderData,
+  useActionData,
+  Form,
+  Link,
+  useNavigation,
+} from "@remix-run/react";
 import Authenticator from "~/services/auth.server";
 import { getSession, commitSession } from "~/services/session.server";
 import { ValidationErrors } from "~/lib/auth.types";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import Spinner from "~/components/locals/spinner";
 
 type DataResponse = {
   error: string;
@@ -41,6 +48,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 function RegisterPage() {
+  const navigation = useNavigation();
   const actionData = useActionData() as ValidationErrors;
   const loaderData = useLoaderData() as DataResponse;
   return (
@@ -137,9 +145,15 @@ function RegisterPage() {
             className="h-12 border-zinc-700"
           />
         </div>
-        <div className="flex justify-end">
-          <Button className="w-28 h-12">Crear cuenta</Button>
-        </div>
+        {navigation.state === "submitting" ? (
+          <div className="flex justify-center w-full">
+            <Spinner />
+          </div>
+        ) : (
+          <div className="flex justify-end">
+            <Button className="w-36 h-12">Crear cuenta</Button>
+          </div>
+        )}
         <div className="flex gap-2 mx-auto w-fit">
           <p>Ya tienes una cuenta?</p>
           <Link to={"/login"} className="text-blue-600 hover:underline">

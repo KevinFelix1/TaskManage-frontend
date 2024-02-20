@@ -4,13 +4,20 @@ import {
   ActionFunctionArgs,
   json,
 } from "@remix-run/node";
-import { useLoaderData, useActionData, Form, Link } from "@remix-run/react";
+import {
+  useLoaderData,
+  useActionData,
+  Form,
+  Link,
+  useNavigation,
+} from "@remix-run/react";
 import Authenticator from "~/services/auth.server";
 import { getSession, commitSession } from "~/services/session.server";
 import { ValidationErrors } from "~/lib/auth.types";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import Spinner from "~/components/locals/spinner";
 
 type DataResponse = {
   error: string;
@@ -42,7 +49,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 function Login() {
-  const actionData = useLoaderData() as ValidationErrors;
+  const navigation = useNavigation();
+  const actionData = useActionData() as ValidationErrors;
+  console.log(actionData);
   const loaderData = useLoaderData() as DataResponse;
   return (
     <>
@@ -63,7 +72,7 @@ function Login() {
       <Form className="w-96 mt-4 space-y-4" method="POST">
         <div className="space-y-1">
           {actionData?.email && (
-            <p className="text-red-600 bg-red-200 px-2 rounded-sm absolute left-36 bottom-14">
+            <p className="text-red-600 bg-red-200 px-2 py-1 rounded-sm">
               {actionData.email}
             </p>
           )}
@@ -82,7 +91,7 @@ function Login() {
         </div>
         <div className="space-y-1">
           {actionData?.password && (
-            <p className="text-red-600 bg-red-200 px-2 rounded-sm absolute left-36 bottom-14">
+            <p className="text-red-600 bg-red-200 px-2 py-1 rounded-sm">
               {actionData.password}
             </p>
           )}
@@ -99,9 +108,16 @@ function Login() {
             className="h-12 border-zinc-700"
           />
         </div>
-        <div className="flex justify-end">
-          <Button className="w-20 h-12">GO!</Button>
-        </div>
+        {navigation.state === "submitting" ? (
+          <div className="flex justify-center w-full">
+            <Spinner />
+          </div>
+        ) : (
+          <div className="flex justify-end">
+            <Button className="w-20 h-12">GO!</Button>
+          </div>
+        )}
+
         <div className="flex gap-2 mx-auto w-fit">
           <p>Aun no tienes cuenta?</p>
           <Link to={"/register"} className="text-blue-600 hover:underline">
