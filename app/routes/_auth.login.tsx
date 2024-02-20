@@ -26,7 +26,7 @@ export const meta: MetaFunction = () => {
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const session = await getSession(request.headers.get("Cookie"));
-  const data = { error: session.get("error") };
+  const data = { success: session.get("success") };
   return json(data, {
     headers: {
       "Set-Cookie": await commitSession(session),
@@ -60,7 +60,7 @@ function Login() {
           {loaderData?.success}
         </p>
       )}
-      <Form className="w-96 mt-4 space-y-4">
+      <Form className="w-96 mt-4 space-y-4" method="POST">
         <div className="space-y-1">
           {actionData?.email && (
             <p className="text-red-600 bg-red-200 px-2 rounded-sm absolute left-36 bottom-14">
