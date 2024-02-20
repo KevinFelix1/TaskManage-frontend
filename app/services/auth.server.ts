@@ -80,7 +80,7 @@ class AuthStrategy {
         process.env.SECRET_KEY as string,
         { expiresIn: "1h" }
       );
-      session.set("Session", token);
+      session.set("session", token);
     } catch (error: any) {
       if (error.issues) {
         const { issues } = error as any;

@@ -6,11 +6,11 @@ import {
 } from "@remix-run/node";
 import { useLoaderData, useActionData, Form, Link } from "@remix-run/react";
 import Authenticator from "~/services/auth.server";
+import { getSession, commitSession } from "~/services/session.server";
+import { ValidationErrors } from "~/lib/auth.types";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { ValidationErrors } from "~/lib/auth.types";
-import { getSession, commitSession } from "~/services/session.server";
 
 type DataResponse = {
   error: string;
@@ -43,7 +43,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 function RegisterPage() {
   const actionData = useActionData() as ValidationErrors;
   const loaderData = useLoaderData() as DataResponse;
-  // console.log(loaderData);
   return (
     <>
       <h1 className="text-3xl font-semibold cursor-default">Crear cuenta</h1>
