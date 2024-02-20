@@ -26,7 +26,7 @@ export const meta: MetaFunction = () => {
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const session = await getSession(request.headers.get("Cookie"));
-  const data = { success: session.get("success") };
+  const data = { success: session.get("success"), error: session.get("error") };
   return json(data, {
     headers: {
       "Set-Cookie": await commitSession(session),
@@ -36,8 +36,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   return await Authenticator.authenticate(request, {
-    failureRedirect: "/register",
-    successRedirect: "/login",
+    failureRedirect: "/login",
+    successRedirect: "/dashboard",
   });
 };
 
